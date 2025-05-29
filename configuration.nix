@@ -86,7 +86,10 @@
    btop
    unzip
    nodejs_24
+   git-credential-oauth
+   git-credential-manager
  ];
+
 
   xdg.portal.enable = true;
   xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
