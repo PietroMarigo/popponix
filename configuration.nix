@@ -88,6 +88,7 @@
    nodejs_24
    git-credential-oauth
    git-credential-manager
+   gh
  ];
 
 
