@@ -3,7 +3,9 @@
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
 
 { config, lib, pkgs, ... }:
-
+let
+  home-manager = builtins.fetchTarball https://github.com/nix-community/home-manager/archive/release-25.05.tar.gz;
+in
 {
   imports =
     [ # Include the results of the hardware scan.
@@ -70,9 +72,13 @@
     ];
     shell = pkgs.zsh;
   };
+  home-manager.users.pmarigo = {pkgs, ... }: {
+    home.packages = [pkgs.atool pkgs.httpie ];
+    programs.bash.enable = true;
+
   programs.zsh.enable = true;
   programs.firefox.enable = true;
-
+  nixpkgs.config.allowUnfree = true;
   # List packages installed in system profile.
   # You can use https://search.nixos.org/ to find more packages (and options).
  environment.systemPackages = with pkgs; [
@@ -89,8 +95,13 @@
    git-credential-oauth
    git-credential-manager
    gh
+   vivaldi (vivaldi.overrideAttrs
+   		(oldAttrs: {
+		  dontWrapQtApps = false;
+		  dontPatchELF = true;
+		  nativeBuildInputs = oldAttrs.nativeBuildInputs ++ [pkgs.kdePackages.wrapQtAppsHook];
+		}))
  ];
-
 
   xdg.portal.enable = true;
   xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
