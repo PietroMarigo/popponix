@@ -36,11 +36,8 @@ in
    useXkbConfig = true; # use xkb.options in tty.
   };
 
+  
   # Enable the X11 windowing system.
-  services.xserver.enable = true;
-  services.displayManager.sddm.enable = true;
-  services.desktopManager.plasma6.enable = true;
-
   # Configure keymap in X11
   # services.xserver.xkb.layout = "us";
   # services.xserver.xkb.options = "eurosign:e,caps:escape";
@@ -53,11 +50,11 @@ in
   # OR
    security.rtkit.enable = true;
    services.pipewire = {
-	enable = true;
-        alsa.enable = true;
-        alsa.support32Bit = true;
-	pulse.enable = true;
-	jack.enable = true;
+      enable = true;
+      alsa.enable = true;
+      alsa.support32Bit = true;
+      pulse.enable = true;
+      jack.enable = true;
     };
 
   # Enable touchpad support (enabled default in most desktopManager).
@@ -84,8 +81,17 @@ in
  environment.systemPackages = with pkgs; [
    neovim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
    wget
-   kdePackages.konsole
    neofetch
+   kitty
+   hyprland
+   waybar (waybar.ovverideAttrs (oldAttrs: {
+        mesonFlags = oldAttrs.mesonFlags ++ [ "-Dexperimentl=true" ];
+  }))
+   wayland
+   hyprpaper
+   rofi-wayland
+   dunst
+   libnotify
    zsh
    git
    zig
@@ -102,6 +108,21 @@ in
 		  nativeBuildInputs = oldAttrs.nativeBuildInputs ++ [pkgs.kdePackages.wrapQtAppsHook];
 		}))
  ];
+
+  
+  hardware = {
+    opengl.enable = true;
+    nvidia.modesetting.enable = true;
+  };
+
+  enviroment.sessionVariables = {
+    NIXOS_OZONE_WL = "1";
+    };
+  programs.hyprland = {
+    enable = true;
+    nvidiaPatches = true;
+    xwayland.enable = true;
+  };
 
   xdg.portal.enable = true;
   xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
