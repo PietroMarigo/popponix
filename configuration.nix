@@ -3,9 +3,7 @@
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
 
 { config, lib, pkgs, ... }:
-let
-  home-manager = builtins.fetchTarball https://github.com/nix-community/home-manager/archive/release-25.05.tar.gz;
-in
+
 {
   imports =
     [ # Include the results of the hardware scan.
@@ -13,14 +11,21 @@ in
     ];
 
   # Use the systemd-boot EFI boot loader.
+  fileSystems."/".device = lib.mkForce "/dev/nvme0n1p3";
+  boot.kernelModules = ["nvme"];
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
   networking.hostName = "nixos"; # Define your hostname.
   # Pick only one of the below networking options.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
-  networking.networkmanager.enable = true;  # Easiest to use and most distros use this by default.
-
+  # networking.networkmanager.enable = true;  # Easiest to use and most distros use this by default.
+  networking.wireless.enable = true;
+  networking.wireless.networks."iPhone di Peppo".psk = "Peppo2001";
+  networking.wireless.networks."WiFi In Domus Olympia".psk = "22v7245C940";
+  networking.wireless.networks."enel-WiFi_75549251".psk = "4B3347387A";
+  networking.wireless.networks."Mpertica".psk="gppa1999";
+  networking.wireless.networks."Network Mpertica".psk="gppa1999";
   # Set your time zone.
   time.timeZone = "Europe/Rome";
 
@@ -63,16 +68,13 @@ in
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.pmarigo= {
     isNormalUser = true;
-    extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
+    extraGroups = [ "wheel" "networkmanager" "input"]; # Enable ‘sudo’ for the user.
     packages = with pkgs; [
       tree
     ];
     shell = pkgs.zsh;
   };
-  home-manager.users.pmarigo = {pkgs, ... }: {
-    home.packages = [pkgs.atool pkgs.httpie ];
-    programs.bash.enable = true;
-
+  
   programs.zsh.enable = true;
   programs.firefox.enable = true;
   nixpkgs.config.allowUnfree = true;
@@ -84,14 +86,18 @@ in
    neofetch
    kitty
    hyprland
-   waybar (waybar.ovverideAttrs (oldAttrs: {
-        mesonFlags = oldAttrs.mesonFlags ++ [ "-Dexperimentl=true" ];
+   waybar (waybar.overrideAttrs (oldAttrs: {
+        mesonFlags = oldAttrs.mesonFlags ++ [ "-Dexperimental=true" ];
   }))
    wayland
    hyprpaper
    rofi-wayland
    dunst
+   wasistlos
    libnotify
+   fastfetch
+   upower
+   discord-ptb
    zsh
    git
    zig
@@ -101,31 +107,39 @@ in
    git-credential-oauth
    git-credential-manager
    gh
-   vivaldi (vivaldi.overrideAttrs
-   		(oldAttrs: {
-		  dontWrapQtApps = false;
-		  dontPatchELF = true;
-		  nativeBuildInputs = oldAttrs.nativeBuildInputs ++ [pkgs.kdePackages.wrapQtAppsHook];
-		}))
- ];
+   kdePackages.dolphin 
+   pipewire
+   kdePackages.qtmultimedia
+   xdg-desktop-portal
+   wofi
+   xdg-desktop-portal-wlr
+   xdg-desktop-portal-gtk
+   udisks2
+   playerctl
+   chromium
+  ];
 
-  
   hardware = {
-    opengl.enable = true;
+    graphics.enable = true;
     nvidia.modesetting.enable = true;
   };
 
-  enviroment.sessionVariables = {
+  services.udisks2.enable = true;
+
+  environment.sessionVariables = {
     NIXOS_OZONE_WL = "1";
     };
   programs.hyprland = {
     enable = true;
-    nvidiaPatches = true;
     xwayland.enable = true;
   };
 
-  xdg.portal.enable = true;
-  xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+  services.upower.enable = true;
+  #services.xdg.portal = {
+  #  enable = true;
+  #  wlr.enable = true;
+  #  extraPortals = [pkgs.xdg-desktop-portal-gtk];
+  #};
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;
